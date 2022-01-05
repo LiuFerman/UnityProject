@@ -24,11 +24,20 @@ public class TankCameraFollow2_4 : MonoBehaviour
     //炮塔旋转速度
     public float turretRotSpeed = 0.5f;
     //炮塔目标角度
-    public float turretRotTarget = 0;
+    private float turretRotTarget = 0;
+
+    //炮管
+    public Transform gun;
+    //炮管的旋转范围
+    private float maxRollGun = -40f;
+    private float minRollGun = 4f;
+    //炮管目标角度
+    private float turretRollTarget = 0;
     // Start is called before the first frame update
     void Start()
     {
         turret = transform.Find("turret");
+        gun = turret.Find("gun");
         //target = GameObject.Find("tank");
         SetTarget(GameObject.Find("tank"));
 
@@ -66,8 +75,12 @@ public class TankCameraFollow2_4 : MonoBehaviour
 
         //炮塔角度
         turretRotTarget = Camera.main.transform.eulerAngles.y;
-
+        //炮管角度
+        turretRollTarget = Camera.main.transform.eulerAngles.x;
+        //炮塔旋转
         TurretRotation();
+        //炮管旋转
+        TurretRoll();
     }
     public void SetTarget(GameObject _target)
     {
@@ -139,5 +152,39 @@ public class TankCameraFollow2_4 : MonoBehaviour
         {
             turret.Rotate(0f,turretRotSpeed,0f);
         }
+    }
+    //旋转炮管
+    void TurretRoll()
+    {
+        if (Camera.main == null)
+        {
+            return;
+        }
+        if (turret == null)
+        {
+            return;
+        }
+        //获取角度
+        Vector3 worldEuler = gun.eulerAngles;
+        Vector3 localEuler = gun.localEulerAngles;
+        //世界坐标系角度计算
+        worldEuler.x = turretRollTarget;
+        gun.eulerAngles = -worldEuler;
+        //本地坐标系角度限制
+        Vector3 euler = gun.localEulerAngles;
+        if (euler.x>180)
+        {
+            euler.x -= 360;
+        }
+        if (euler.x>maxRollGun)
+        {
+            euler.x = maxRollGun;
+        }
+        else if (euler.x<minRollGun)
+        {
+            euler.x = minRollGun;
+        }
+
+        gun.localEulerAngles = new Vector3(euler.x,localEuler.y,localEuler.z);
     }
 }
